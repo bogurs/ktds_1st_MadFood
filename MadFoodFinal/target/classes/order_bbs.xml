@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC '-//ibatis.apache.org//DTD sql Map 2.0//EN' 
+'http://ibatis.apache.org/dtd/sql-map-2.dtd'>
+
+<sqlMap>
+
+	<typeAlias alias="order" type="com.ktds.order.vo.OrderVO"/>
+
+	<insert id="insertOrder" parameterClass="HashMap">
+		insert into orderbbs values
+			(#order_num#, #dish_num#, #id#, 
+			sysdate(), null, #count#)
+	</insert>
+	
+	<select id="updateOrder" resultClass="Int">
+		select ifnull(max(num), 0)+1 from orderbbs
+	</select>
+	
+	<select id="getOrderList" parameterClass="String" resultClass="order">
+		select m.dish_num, m.id, title, 
+  			price, menu_content, menu_kind, pic_name, 
+ 			order_num, order_date, count 
+		from menu m, orderbbs o 
+		where m.dish_num=o.dish_num and 
+     		  o.id=#id# and 
+     		  order_num=(select max(order_num)
+                    	from orderbbs)
+	</select>
+	
+</sqlMap>

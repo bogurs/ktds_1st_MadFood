@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC '-//ibatis.apache.org//DTD sql Map 2.0//EN' 
+'http://ibatis.apache.org/dtd/sql-map-2.dtd'>
+
+<sqlMap>
+	<typeAlias alias="menu" type="com.ktds.menu.vo.MenuVO" />
+	<typeAlias alias="menucomment" type="com.ktds.menu.vo.CommentVO" />
+	<insert id="registerMenu" parameterClass="menu">
+		insert into menu
+		values(null,#id#,#title#,#price#,#menu_content#,sysdate(),
+		#menu_kind#,#mpic_name.originalFilename#)
+	</insert>
+
+	<select id="getMenu" resultClass="menu">
+		select dish_num, title,
+		menu_content, pic_name, price from menu
+	</select>
+
+	<select id="GetInform" resultClass="menu">
+		select dish_num, title,
+		menu_content, pic_name, price from menu where dish_num=#dish_num#
+	</select>
+
+	<insert id="insertFoodComment" parameterClass="HashMap">
+		insert into
+		menu_comment
+		values(null,#id#,#comment_content#,sysdate(),#dish_num#)
+	</insert>
+
+	<select id="getAllFoodComment" parameterClass="Int" resultClass="menucomment">
+		select * from menu_comment where dish_num=#dish_num# order by
+		menucomment_num
+	</select>
+
+	<delete parameterClass="Int" id="deleteMenu">
+		delete from menu where
+		dish_num=#dish_num#
+	</delete>
+
+	<delete parameterClass="Int" id="deleteMenuComment">
+		delete from menu_comment where
+		dish_num=#dish_num#
+	</delete>
+</sqlMap>
+
+
+ 

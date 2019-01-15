@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC '-//ibatis.apache.org//DTD sql Map 2.0//EN' 
+'http://ibatis.apache.org/dtd/sql-map-2.dtd'>
+
+<sqlMap>
+	
+	<typeAlias alias="article1" type="com.ktds.notice.vo.NoticeVO"/>
+	<typeAlias alias="comment1" type="com.ktds.notice.vo.NoticeCommentVO"/>
+	
+	<select id="notice_getArticleCount" resultClass="Int">
+		select count(*) from notice
+	</select>
+	
+	<select id="notice_getArticles" parameterClass="HashMap" resultClass="article1">
+		select article_num, id, title, depth, hit, write_date 
+		from (select @rownum:=@rownum+1 rm,human.* from 
+				(select * from notice order by group_id desc, pos) human) rmt
+				,(select @rownum:=0) rnt
+		where rm between #startRow# and #endRow#
+	</select>
+	
+	<insert id="notice_insertArticle" parameterClass="article1">
+		insert into notice values 
+		(null,#id#,#title#,#content#,0,0,
+		(select max_article_num from (select ifnull(max(article_num), 0)+1 max_article_num from notice) tmp)
+		,0,sysdate(),#ibatisfname.originalFilename#)
+	</insert>
+	
+	<select id="notice_getArticle" parameterClass="Int" resultClass="article1">
+		select * from notice where article_num=#article_num#
+	</select>
+	
+	<select id="notice_getCommentNum" parameterClass="Int" resultClass="Int">
+		select count(*) from notice_comment where article_num=#article_num#
+	</select>
+	
+	<delete id="notice_deleteArticle" parameterClass="Int">
+		delete from notice where article_num=#article_num#
+	</delete>
+	
+	<delete id="notice_deleteComment" parameterClass="Int">
+		delete from comment_notice where article_num=#article_num#
+	</delete>
+	
+	<select id="notice_getUpdateArticle" parameterClass="Int" resultClass="article1">
+		select title, content, fname from notice where article_num=#article_num#
+	</select>
+	
+	<update id="notice_UpdateArticle" parameterClass="HashMap">
+		update notice set title=#title#, content=#content# where article_num=#article_num#
+	</update>
+	
+	<update id="notice_replyUpdate" parameterClass="article1">
+		update notice set pos=pos+1 where group_id=#group_id# and pos>#pos#
+	</update>
+	
+	<insert id="notice_reply" parameterClass="article1">
+		insert into notice values 
+		(null,#id#,#title#,#content#,#depth#+1,0,
+		#group_id#,#pos#+1,sysdate(),#ibatisfname.originalFilename#)
+	</insert>
+	
+	<update id="notice_addHit" parameterClass="Int">
+		update notice set hit=hit+1 where article_num=#article_num#
+	</update>
+	
+	
+	<insert id="notice_insertComment" parameterClass="HashMap">
+		insert into notice_comment values(null,#id#,#comment_content#,sysdate(),#article_num#)
+	</insert>
+	
+	<select id="notice_getAllComment" parameterClass="Int" resultClass="comment1">
+		select * from notice_comment where article_num=#article_num# order by comment_num
+	</select>
+	
+	
+</sqlMap>

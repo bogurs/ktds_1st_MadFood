@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC '-//ibatis.apache.org//DTD sql Map 2.0//EN' 
+'http://ibatis.apache.org/dtd/sql-map-2.dtd'>
+
+<sqlMap>
+	
+	<typeAlias alias="article" type="com.ktds.qna.vo.QnaVO"/>
+	<typeAlias alias="comment" type="com.ktds.qna.vo.QnaCommentVO"/>
+	
+	<select id="getArticleCount" resultClass="Int">
+		select count(*) from qna
+	</select>
+	
+	<select id="getArticles" parameterClass="HashMap" resultClass="article">
+		select article_num, id, title, depth, hit, write_date 
+		from (select @rownum:=@rownum+1 rm,human.* from 
+				(select * from qna order by group_id desc, pos) human) rmt
+				,(select @rownum:=0) rnt
+		where rm between #startRow# and #endRow#
+	</select>
+	
+	<select id="login_check" parameterClass="String" resultClass="String">
+		select pass from member where id=#id#
+	</select>
+	
+	<insert id="insertArticle" parameterClass="article">
+		insert into qna values 
+		(null,#id#,#title#,#content#,0,0,
+		(select max_article_num from (select ifnull(max(article_num), 0)+1 max_article_num from qna) tmp),0,sysdate())
+	</insert>
+	
+	<select id="getArticle" parameterClass="Int" resultClass="article">
+		select * from qna where article_num=#article_num#
+	</select>
+	
+	<select id="getCommentNum" parameterClass="Int" resultClass="Int">
+		select count(*) from qna_comment where article_num=#article_num#
+	</select>
+	
+	<delete id="deleteArticle" parameterClass="Int">
+		delete from qna where article_num=#article_num#
+	</delete>
+	
+	<delete id="deleteComment" parameterClass="Int">
+		delete from qna_comment where article_num=#article_num#
+	</delete>
+	
+	<select id="getUpdateArticle" parameterClass="Int" resultClass="article">
+		select title, content, fname from qna where article_num=#article_num#
+	</select>
+	
+	<update id="UpdateArticle" parameterClass="HashMap">
+		update qna set title=#title#, content=#content# where article_num=#article_num#
+	</update>
+	
+	<update id="replyUpdate" parameterClass="article">
+		update qna set pos=pos+1 where group_id=#group_id# and pos>#pos#
+	</update>
+	
+	<insert id="reply" parameterClass="article">
+		insert into qna values 
+		(null,#id#,#title#,#content#,#depth#+1,0,
+		#group_id#,#pos#+1,sysdate())
+	</insert>
+	
+	<update id="addHit" parameterClass="Int">
+		update qna set hit=hit+1 where article_num=#article_num#
+	</update>
+	
+		
+	<insert id="insertComment" parameterClass="HashMap">
+		insert into qna_comment values(null,#id#,#comment_content#,sysdate(),#article_num#)
+	</insert>
+	
+	<select id="getAllComment" parameterClass="Int" resultClass="comment">
+		select * from qna_comment where article_num=#article_num# order by comment_num
+	</select>
+	
+</sqlMap>

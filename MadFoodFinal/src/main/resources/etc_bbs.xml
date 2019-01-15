@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC '-//ibatis.apache.org//DTD sql Map 2.0//EN' 
+'http://ibatis.apache.org/dtd/sql-map-2.dtd'>
+
+<sqlMap>
+   <typeAlias alias="article2" type="com.ktds.etc.vo.JoinVO"/>
+	<typeAlias alias="comment2" type="com.ktds.etc.vo.CommentVO"/>
+
+	<insert id="join" parameterClass="article2">
+		insert into member values(#id#,#pass#,#name#,#phonenumber#,#address#,#mileage#)
+	</insert>
+	<select id="searchId" parameterClass="String" resultClass="String">
+		select id from member where id=#id#
+	</select>
+	
+</sqlMap>
